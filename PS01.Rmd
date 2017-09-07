@@ -1,6 +1,6 @@
 ---
 title: "STAT/MATH 495: Problem Set 01"
-author: "WRITE YOUR NAME HERE"
+author: "Jonathan Che"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
   html_document:
@@ -18,4 +18,25 @@ knitr::opts_chunk$set(echo = TRUE, fig.width=8, fig.height=4.5)
 library(tidyverse)
 ```
 
+## Setting up
+
+```{r}
+library(tidyverse)
+train <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/train.csv")
+test <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/test.csv")
+```
+
+## Exploratory data analysis
+
+In class, we found that just predicting only women to survive 
+
+```{r}
+
+```
+
+## Making predictions
+
+```{r}
+
+```
 
