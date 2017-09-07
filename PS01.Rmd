@@ -24,19 +24,53 @@ library(tidyverse)
 library(tidyverse)
 train <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/train.csv")
 test <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/test.csv")
+submission <- read_csv("https://rudeboybert.github.io/STAT495/static/Titanic/gender_submission.csv")
 ```
 
 ## Exploratory data analysis
 
-In class, we found that just predicting only women to survive 
+In class, we found that just predicting only women to survive resulted in about 75% accuracy. We'll explore the training data to see if there are any simple heuristics we can use to improve this prediction.
 
 ```{r}
-
+with(train, table(Sex, Survived))
 ```
+
+We notice that as expected, females are much more likely to survive. Still, though, nearly 20% of males in the training set survived. We want to see if there are any simple heuristics we can use to try to predict some of these male survivors.
+
+The famous adage from the Titanic sinking is: "Women and children first!". Let's see if male children are more likely to survive than older males.
+
+```{r, warning=FALSE}
+males <- filter(train, Sex=="male")
+ggplot(males, aes(x=Age, fill=factor(Survived))) +
+  geom_histogram(binwidth=5, position="fill")
+```
+
+We'll make the qualitative judgment of calling anyone less than 13 years old a "child". It seems like boys have a much higher survival rate than other men.
+
+```{r, warning=FALSE}
+females <- filter(train, Sex=="female")
+ggplot(females, aes(x=Age, fill=factor(Survived))) +
+  geom_histogram(binwidth=5, position="fill")
+```
+
+Just for fun, we check whether females have this bias too. In general, it doesn't seem that girls have a significantly better chance of survival than other women!
 
 ## Making predictions
 
-```{r}
+Based on our EDA, I build a model that has women and boys (males less than 13 years old) surviving. I would expect such a change to be very marginally better than the model that only uses passenger sex, since there were not many children on the Titanic overall, and only slightly more than 50% of the boys in the training set survived.
 
+```{r}
+preds <- test %>%
+  mutate(is_young = Age < 13,
+         Survived = (Sex == "female") | (Sex == "male" & is_young)) %>%
+  mutate(Survived = as.integer(Survived)) %>%
+  select(PassengerId, Survived)
+# Some Age values are NA, resulting in NA predictions
+# We classify males with missing age as "old" males because
+# males are generally less likely to survive.
+preds[is.na(preds)] <- 0
+
+# writing output to submission csv file
+write_csv(preds, "submission.csv")
 ```
 
